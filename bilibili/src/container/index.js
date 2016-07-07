@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { Navigator , View , Text} from 'react-native';
 import { bindActionCreators } from 'redux';
-import Essence from '../layouts/Essence';
+import Essence from '../page/Essence';
 console.log(Essence)
 import * as EssenceActions from '../actions/EssenceActions';
+import * as TabActions from '../actions/TabActions';
 import { connect } from 'react-redux';
+import navigationBar from './navigationBar'
+import TabView from './tabview'
 
 class BilibiliApp extends Component {
   constructor (props){
@@ -12,16 +15,36 @@ class BilibiliApp extends Component {
   }
 
   render (){
+    const { state , actions } = this.props;
+    let defaultName = '精选';
+    let defaultComponent = TabView;
+    console.log(this)
     return (
-      <Essence />
+      <Navigator
+          initialRoute={{ name: defaultName, component: defaultComponent }}
+          configureScene={(route) => {
+            return Navigator.SceneConfigs.VerticalDownSwipeJump;
+          }}
+          renderScene={(route, navigator) => {
+            console.log(route)
+              let Component = route.component;
+              return <Component {...this.props} {...route.params} navigator={navigator} />
+          }}
+          navigationBar={navigationBar}
+      />
     )
   }
 }
 
-export default connect ( state => ({
-  essence : state.essence,
-}),
-  (dispatch) => ({
-    essence : bindActionCreators(EssenceActions , dispatch)
-  })
-)(BilibiliApp)
+const mapActionCreators = (dispatch) => ({
+  essence : bindActionCreators(EssenceActions , dispatch),
+  tab : bindActionCreators(TabActions , dispatch)
+})
+
+const mapStateToProps = (state)=>
+({
+  Essence : state.Essence,
+  Tab : state.Tab
+})
+
+export default connect (mapStateToProps , mapActionCreators)(BilibiliApp)
